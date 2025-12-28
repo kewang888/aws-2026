@@ -63,3 +63,29 @@ output "configure_kubectl" {
   description = "Command to configure kubectl"
   value       = "aws eks update-kubeconfig --region ${var.aws_region} --name ${aws_eks_cluster.main.name}"
 }
+
+# Karpenter Outputs
+output "karpenter_controller_role_arn" {
+  description = "IAM role ARN for Karpenter controller"
+  value       = aws_iam_role.karpenter_controller.arn
+}
+
+output "karpenter_node_role_arn" {
+  description = "IAM role ARN for Karpenter nodes"
+  value       = aws_iam_role.karpenter_node.arn
+}
+
+output "karpenter_node_instance_profile_name" {
+  description = "Instance profile name for Karpenter nodes"
+  value       = aws_iam_role.karpenter_node.name
+}
+
+output "karpenter_interruption_queue_name" {
+  description = "SQS queue name for Karpenter interruption handling"
+  value       = aws_sqs_queue.karpenter_interruption.name
+}
+
+output "oidc_provider_arn" {
+  description = "ARN of the OIDC Provider for EKS"
+  value       = aws_iam_openid_connect_provider.eks.arn
+}

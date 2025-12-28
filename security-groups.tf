@@ -40,6 +40,7 @@ resource "aws_security_group" "nodes" {
   tags = {
     Name                                        = "${var.cluster_name}-nodes-sg"
     "kubernetes.io/cluster/${var.cluster_name}" = "owned"
+    "karpenter.sh/discovery"                    = var.cluster_name
   }
 }
 

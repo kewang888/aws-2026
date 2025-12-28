@@ -51,6 +51,19 @@ resource "aws_eks_node_group" "main" {
     max_unavailable = 1
   }
 
+  # Taint to prefer Karpenter nodes for application workloads
+  taint {
+    key    = "CriticalAddonsOnly"
+    value  = "true"
+    effect = "NO_SCHEDULE"
+  }
+
+  # Labels for system node group
+  labels = {
+    role                           = "system"
+    "node.kubernetes.io/lifecycle" = "on-demand"
+  }
+
   # Remote access configuration (optional, for SSH debugging)
   # Uncomment if you want SSH access to nodes
   # remote_access {
