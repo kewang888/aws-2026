@@ -3,7 +3,7 @@ set -e
 
 CLUSTER_NAME="aws-2026-eks"
 AWS_REGION="us-east-1"
-KARPENTER_VERSION="1.7.4"
+KARPENTER_VERSION="0.37.2"
 
 echo "Installing Karpenter ${KARPENTER_VERSION}..."
 
@@ -38,7 +38,7 @@ helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
   --set "controller.resources.requests.memory=256Mi" \
   --set "controller.resources.limits.cpu=1000m" \
   --set "controller.resources.limits.memory=1Gi" \
-  --set "replicas=2" \
+  --set "replicas=1" \
   --set "tolerations[0].key=CriticalAddonsOnly" \
   --set "tolerations[0].operator=Exists" \
   --set "tolerations[0].effect=NoSchedule" \
@@ -48,6 +48,18 @@ helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
   --wait
 
 echo ""
+echo "Disabling CRD conversion webhooks..."
+# Disable conversion webhooks on all Karpenter CRDs to avoid service endpoint issues
+kubectl patch crd nodeclaims.karpenter.sh --type='json' \
+  -p='[{"op": "replace", "path": "/spec/conversion", "value": {"strategy": "None"}}]' || true
+
+kubectl patch crd nodepools.karpenter.sh --type='json' \
+  -p='[{"op": "replace", "path": "/spec/conversion", "value": {"strategy": "None"}}]' || true
+
+kubectl patch crd ec2nodeclasses.karpenter.k8s.aws --type='json' \
+  -p='[{"op": "replace", "path": "/spec/conversion", "value": {"strategy": "None"}}]' || true
+
+echo ""
 echo "Karpenter installation complete!"
 echo ""
 echo "Verify with:"
@@ -55,7 +67,8 @@ echo "  kubectl get pods -n karpenter"
 echo "  kubectl logs -n karpenter -l app.kubernetes.io/name=karpenter"
 echo ""
 echo "Next steps:"
-echo "  1. Apply NodePool: kubectl apply -f k8s-manifests/karpenter-nodepool-default.yaml"
-echo "  2. Test with: kubectl apply -f k8s-manifests/test-deployment.yaml"
-echo "  3. Scale up: kubectl scale deployment inflate --replicas=5"
-echo "  4. Watch nodes: kubectl get nodes --watch"
+echo "  1. Apply aws-auth ConfigMap: kubectl apply -f k8s-manifests/aws-auth-cm.yaml"
+echo "  2. Apply NodePool: kubectl apply -f k8s-manifests/karpenter-nodepool-default.yaml"
+echo "  3. Test with: kubectl apply -f k8s-manifests/test-deployment.yaml"
+echo "  4. Scale up: kubectl scale deployment inflate --replicas=5"
+echo "  5. Watch nodes: kubectl get nodes --watch"

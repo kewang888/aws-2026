@@ -68,10 +68,10 @@ metadata:
   name: default
 spec:
   # AMI selection - use EKS optimized AMI
-  amiFamily: AL2
+  amiFamily: AL2023
   amiSelectorTerms:
     - owner: "602401143452"  # AWS EKS AMI account
-      name: "amazon-eks-node-1.32-*"
+      name: "amazon-eks-node-al2023-x86_64-standard-1.33-*"
 
   # IAM role for nodes
   role: "aws-2026-eks-karpenter-node"
